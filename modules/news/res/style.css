@@ -1,0 +1,39 @@
+#news {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 40%;
+  height: 93%;
+  overflow-y: hidden;
+  border-left: 1px solid #2c3e50;
+  z-index: 101;
+}
+#news table {
+  border-bottom: 1px solid #2c3e50;
+}
+#news th {
+  background: #EAF7FF;
+}
+.news-date {
+  display: block;
+  text-align: center;
+  font-size: 300%;
+  color: #34495e;
+}
+.news-month {
+  display: block;
+  text-align: center;
+  font-size: 130%;
+  color: #34495e;
+}
+.news-head,
+.news-text {
+  padding: 10px;
+  font-size: 170%;
+  font-family: Arial;
+}
+.news-head {
+  color: #c0392b;
+  font-weight: bold;
+  padding-bottom: 0;
+}

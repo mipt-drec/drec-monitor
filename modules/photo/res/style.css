@@ -1,0 +1,29 @@
+#photo {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 60%;
+	height: 66%;
+	overflow: hidden;
+}
+#photo .carousel-inner {
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+}
+#photo .item {
+	/*display: none;*/
+	position: relative;
+}
+#photo .item.active {
+	display: block;
+}
+#photo .photo-img {
+	width: 100%;
+}
+#photo .carousel-caption {
+	text-align: center;
+	font-size: 40px;
+	padding: 11px 0 10px 0;
+	margin-top: -6px;
+}

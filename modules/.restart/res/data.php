@@ -1,0 +1,3 @@
+<?php
+	rename("../../restart", "../../.restart");
+?>

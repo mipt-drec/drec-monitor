@@ -1,0 +1,28 @@
+#tutu {
+	position: absolute;
+	bottom: 7%;
+	left: 0;
+	width: 60%;
+	height: 27%;
+	overflow: hidden;
+	z-index: 100;
+}
+#tutu table {
+	height: 100%;
+	/*background-color: #ecf0f1;*/
+	font-weight: normal;
+	border-top: 1px solid #2c3e50;
+}
+#tutu th {
+  color: #34495e;
+  font-size: 135%;
+  letter-spacing: 3px;
+  background-color: #EAF7FF;
+}
+#tutu th,
+#tutu td {
+  padding: 8px;
+}
+#tutu td {
+  font-size: 180%;
+}
