@@ -4,6 +4,7 @@ $text = <<<TXT
 <span class="fright" id="curr-date-time">
 <span id="curr-date"></span>
 <span class="sun-flower" id="curr-time"></span>
+<span id="time-to-lesson"</span>
 </span>
 TXT;
 echo json_encode(array(

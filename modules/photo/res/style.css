@@ -12,7 +12,7 @@
 	width: 100%;
 }
 #photo .item {
-	/*display: none;*/
+	display: none;
 	position: relative;
 }
 #photo .item.active {

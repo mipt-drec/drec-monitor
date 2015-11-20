@@ -3,7 +3,7 @@
 $ch = curl_init();
 
 // установка URL и других необходимых параметров
-@curl_setopt($ch, CURLOPT_URL, "http://api.openweathermap.org/data/2.5/weather?q=Dolgoprudniy&lang=ru&units=metric");
+@curl_setopt($ch, CURLOPT_URL, "http://api.openweathermap.org/data/2.5/weather?q=Dolgoprudniy&lang=ru&units=metric&appid=c99cd50b0e98e47e67d497d48f135eaa");
 @curl_setopt($ch, CURLOPT_HEADER, 0);
 @curl_setopt($ch, CURLOPT_COOKIEJAR, "cookies.txt"); 
 @curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

@@ -31,6 +31,25 @@
 		$('#curr-date').html(tmp);
 		tmp = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2); // + ':' + ((date.getSeconds() < 10) ? '0' : ') + date.getSeconds();
 		$('#curr-time').text(tmp);
+
+		//time before lesson
+		curr_time_in_minutes = date.getHours() * 60 + date.getMinutes(); //from beginning of day
+		time_left = 0;
+		if (curr_time_in_minutes <= 540) {time_left = -curr_time_in_minutes + 540} //9:00
+		else if (curr_time_in_minutes <= 645) {time_left = -curr_time_in_minutes + 645} //10:45
+		else if (curr_time_in_minutes <= 740) {time_left = -curr_time_in_minutes + 740} //12:20
+		else if (curr_time_in_minutes <= 835) {time_left = -curr_time_in_minutes + 835} //13:55
+		else if (curr_time_in_minutes <= 930) {time_left = -curr_time_in_minutes + 930} //15:30
+		else if (curr_time_in_minutes <= 1025) {time_left = -curr_time_in_minutes + 1025} //17:05
+		else if (curr_time_in_minutes <= 1110) {time_left = -curr_time_in_minutes + 1110} //18:30
+		else {time_left = 1440 - curr_time_in_minutes +  540} //9:00 next day
+
+		tmp = "(до пары " + (('0' + (time_left / 60 | 0)).slice(-2) + ':' + ('0' + time_left % 60).slice(-2)) + ")"; 
+
+		//no lessons on sunday!
+		if (date.getDay === 0) {tmp = ""};
+
+		$('#time-to-lesson').text(tmp);
 	};
 	data_modules["datetime"]["delta_time"] = 0;
 	var data = data_modules["datetime"];
