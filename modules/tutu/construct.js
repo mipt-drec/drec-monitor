@@ -15,6 +15,12 @@
 						for (var j=1; j<=4; j++){
 							$("#tutu .tutu"+i+" .tutur"+j).html(data["data"][i][j]);
 						}
+						if (!parseInt(data["data"][i][11])){
+							$("#tutu .tutu"+i+" .tutur11").hide();
+						}else{
+							$("#tutu .tutu"+i+" .tutur11").show();
+							$("#tutu .tutu"+i+" .tutur11 span:first-child").html(data["data"][i][11]);
+						}
 						if (!parseInt(data["data"][i][21])){
 							$("#tutu .tutu"+i+" .tutur21").hide();
 						}else{

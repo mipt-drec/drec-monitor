@@ -1,1 +1,1 @@
-{"temp":"+4,3","ico":"10.png","wind":5,"water":98}
+{"temp":"+8,1","ico":"04.png","wind":4,"water":56}

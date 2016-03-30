@@ -1,5 +1,5 @@
 <?php
-include "../../config.php";
+include "config.php";
 
 $DOL = "s9600766"; // Dolgoprudniy
 $NOV = "s9601261"; // Novodachnaya
@@ -30,19 +30,21 @@ function getPage($url) {
 }
 
 function setFlag($value) {
-    $handler = fopen("flag.txt", "wb");
+    global $path;
+    $handler = fopen($path . "flag.txt", "wb");
     fwrite($handler, $value);
     fclose($handler);
 }
 
 // Нужно ли грузить данные.
 function tryToGetThreads() {
+    global $path;
     global $RASP_API;
     global $DOL;
     global $TIM;
 
     $now = new DateTime();
-    $flagFile = "flag.txt";
+    $flagFile = $path . "flag.txt";
     $handler = fopen($flagFile, "r");
     $allowGet = fread($handler, 1) == "1"; // "1" - for get, "0" - for miss
     fclose($handler);
@@ -63,7 +65,7 @@ function tryToGetThreads() {
 
 // Получаем список рейсов по АПИ.
 function getThreads($url) {
-    echo "GET THREADS\n";
+    global $path;
     // Поиск поездов от Долгопрудной до Тимерязевской
 
     $now = new DateTime();
@@ -75,15 +77,17 @@ function getThreads($url) {
 
     $result = array_merge($resultToday->threads, $resultTomorrow->threads);
 
-    $handle = fopen("today.txt", "wb");
+    $handle = fopen($path . "today.txt", "wb");
     fwrite($handle, json_encode($result));
     fclose($handle);
 }
 
 // Считываем записи.
 function readThreads() {
-    $handle = fopen("today.txt", "r");
-    $threads = fread($handle, filesize("today.txt"));
+    global $path;
+
+    $handle = fopen($path . "today.txt", "r");
+    $threads = fread($handle, filesize($path . "today.txt"));
     fclose($handle);
 
     return json_decode($threads);
@@ -140,10 +144,10 @@ for ($i = 0; $i < 4; $i++) {
         if ($index && $departure > $arrival) {
             $ret["data"][$j][$index] = $time;
 
-            // Время ожидания для Новодачной.
-            if ($stop->station->code == $NOV) {
+            // Время ожидания для Долгопрудной и Новодачной.
+            if ($stop->station->code == $DOL || $stop->station->code == $NOV) {
                 $now = new DateTime();
-                $wait = $now->diff($arrival);
+                $wait = $now->diff($departure);
                 $ret["data"][$j][$index * 10 + 1] = $wait->format("%i");
             }
         } else {
@@ -152,7 +156,7 @@ for ($i = 0; $i < 4; $i++) {
     }
 }
 
-$handle = fopen ("res/data.txt", "wb");
+$handle = fopen ($path . "res/data.txt", "wb");
 fwrite ($handle, json_encode($ret));
 fclose($handle);
 
