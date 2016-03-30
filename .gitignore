@@ -1,2 +1,5 @@
 *.sublime-*
 config.php
+.idea/
+modules/tutu/**/today.txt
+modules/tutu/**/flag.txt
