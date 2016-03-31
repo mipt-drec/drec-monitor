@@ -51,6 +51,7 @@ $text = <<<TXT
 		<td class='tutur3'></td>
 		<td class='tutur4'></td>
 		</tr>
+		<tr><td class='copyright' colspan='4'></td></tr>
 	</tbody>
 	</table>
 TXT;

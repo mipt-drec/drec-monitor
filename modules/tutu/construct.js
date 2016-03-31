@@ -28,6 +28,9 @@
 							$("#tutu .tutu"+i+" .tutur21 span:first-child").html(data["data"][i][21]);
 						}
 					}
+					if (data["copyright"]["logo_hm"]) {
+						$("#tutu .copyright").html(data["copyright"]["logo_hm"]);
+					}
 				} catch (e) {
 					console.log("tutu print error");
 					console.log(e);

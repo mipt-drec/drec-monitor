@@ -1,5 +1,8 @@
 <?php
 include "config.php";
+date_default_timezone_set('Europe/Moscow');
+
+global $path;
 
 $DOL = "s9600766"; // Dolgoprudniy
 $NOV = "s9601261"; // Novodachnaya
@@ -8,7 +11,12 @@ $TIM = "s9602463"; // Timeryasevskay
 
 $STATIONS = array($DOL, $NOV, $MRK, $TIM);
 
-date_default_timezone_set('Europe/Moscow');
+// Формируем данные.
+$now = new DateTime();
+$ret = array(
+    "data" => array(),
+    "copyright" => array()
+);
 
 function getPage($url) {
     $API_URL = "https://api.rasp.yandex.net/v1.0/";
@@ -42,6 +50,7 @@ function tryToGetThreads() {
     global $RASP_API;
     global $DOL;
     global $TIM;
+    global $ret;
 
     $now = new DateTime();
     $flagFile = $path . "flag.txt";
@@ -49,18 +58,35 @@ function tryToGetThreads() {
     $allowGet = fread($handler, 1) == "1"; // "1" - for get, "0" - for miss
     fclose($handler);
 
-    // Разрешаем загрузку только с 3:00 и до 4:00.
-    $am3 = new DateTime($now->format('Y-m-d') . ' 3:00:00');
-    $am4 = new DateTime($now->format('Y-m-d') . ' 4:00:00');
+    // Разрешаем загрузку только с 3:00 и до 3:30.
+    $am3 = new DateTime($now->format("Y-m-d") . " 3:00:00");
+    $am4 = new DateTime($now->format("Y-m-d") . " 23:50:00");
 
     if ($am3 < $now && $now < $am4) {
         if ($allowGet) {
             getThreads("search/?apikey=" . $RASP_API . "&from=" . $DOL . "&to=" . $TIM);
+            $ret["copyright"] = getPage("copyright/?apikey=" . $RASP_API . "&format=json")->copyright;
             setFlag("0");
         }
     } else {
         setFlag("1");
     }
+}
+
+// Ближайшие рейсы.
+function closestThreads($thread) {
+    $now = new DateTime("now");
+    $departure = new DateTime($thread->departure);
+    return ($now < $departure);
+}
+
+// Возращаем для отдельного рейса только UID и дату.
+function getUids($thread) {
+    $departure = new DateTime($thread->departure);
+    return array(
+        "uid" => $thread->thread->uid,
+        "date" => $departure->format("Y-m-d")
+    );
 }
 
 // Получаем список рейсов по АПИ.
@@ -93,22 +119,6 @@ function readThreads() {
     return json_decode($threads);
 }
 
-// Ближайшие рейсы.
-function closestThreads($thread) {
-    $now = new DateTime("now");
-    $departure = new DateTime($thread->departure);
-    return ($now < $departure);
-}
-
-// Возращаем для отдельного рейса только UID и дату.
-function getUids($thread) {
-    $departure = new DateTime($thread->departure);
-    return array(
-        "uid" => $thread->thread->uid,
-        "date" => $departure->format("Y-m-d")
-    );
-}
-
 // Фильтруем станции.
 function needStations($stop) {
     global $STATIONS;
@@ -117,24 +127,52 @@ function needStations($stop) {
 
 tryToGetThreads();
 
-$threads = readThreads();
+$dataFromToday = readThreads();
 // Получаем UID нитей.
-$uids = array_map("getUids", array_values(array_filter($threads, "closestThreads")));
+$threads = array_map("getUids", array_values(array_filter($dataFromToday, "closestThreads")));
 
-
-// Формируем данные.
-$ret = array(
-    "data" => array()
-);
 for ($i = 0; $i < 4; $i++) {
     $j = $i + 1;
     $ret["data"][$j] = array();
 
-    $uid = $uids[$i];
+    $thread = $threads[$i];
 
-    // Информация по отдельному рейсу.
-    $thread = getPage("thread/?apikey=" . $RASP_API . "&format=json&uid=" . $uid["uid"] . "&lang=ru&date=" . $uid["date"]);
-    $stops = array_values(array_filter($thread->stops, "needStations"));
+    $fileUid = $path . "tmp/" . $thread["uid"] . ".txt";
+
+    $fileExits = file_exists($fileUid);
+    $dateFile = new DateTime();
+
+    if ($fileExits) {
+        $handler = fopen($fileUid, "r");
+        $dataFile = fread($handler, filesize($fileUid));
+        fclose($handler);
+        $infoThread = json_decode($dataFile);
+
+        $dateFile = new DateTime($infoThread->date);
+    }
+
+    $stops = array();
+
+    // Если файла нет или сейчас больше чем дата в файле, то грузим по АПИ.
+    // Должно выполняться раз в сутки.
+    if ($now > $dateFile || !$fileExits) {
+        // Информация по отдельному рейсу.
+        $threadApi = getPage("thread/?apikey=" . $RASP_API . "&format=json&uid=" .
+            $thread["uid"] . "&lang=ru&date=" . $thread["date"]);
+        $stops = array_values(array_filter($threadApi->stops, "needStations"));
+
+        $toDataFile = array(
+            "date" => $now->format("Y-m-d") . " 23:59:59",
+            "stops" => $stops
+        );
+
+        $handler = fopen($fileUid, "w+");
+        fwrite($handler, json_encode($toDataFile));
+        fclose($handler);
+    } else {
+        $stops = $infoThread->stops;
+    }
+
 
     foreach ($stops as $stop) {
         $arrival = new DateTime($stop->arrival);
@@ -146,9 +184,9 @@ for ($i = 0; $i < 4; $i++) {
 
             // Время ожидания для Долгопрудной и Новодачной.
             if ($stop->station->code == $DOL || $stop->station->code == $NOV) {
-                $now = new DateTime();
                 $wait = $now->diff($departure);
-                $ret["data"][$j][$index * 10 + 1] = $wait->format("%i");
+                $minutes = $wait->h * 60 + $wait->i;
+                $ret["data"][$j][$index * 10 + 1] = $minutes < 100 ? $minutes : "";
             }
         } else {
             $ret["data"][$j][$index] = "&mdash;";
